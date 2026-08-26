@@ -1,26 +1,118 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  --color-on-surface: #1b1b23;
+  --color-surface-container-highest: #e3e1ed;
+  --color-on-error: #ffffff;
+  --color-on-error-container: #93000a;
+  --color-secondary-container: #fed488;
+  --color-tertiary: #002769;
+  --color-inverse-surface: #303039;
+  --color-surface-bright: #fbf8ff;
+  --color-secondary: #775a19;
+  --color-verified-green: #008542;
+  --color-tertiary-container: #003c97;
+  --color-zillow-blue: #006AFF;
+  --color-on-tertiary-fixed-variant: #0040a1;
+  --color-on-secondary-container: #785a1a;
+  --color-surface: #fbf8ff;
+  --color-on-primary: #ffffff;
+  --color-on-primary-fixed-variant: #095045;
+  --color-on-primary-fixed: #00201b;
+  --color-on-background: #1b1b23;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-low: #f5f2fe;
+  --color-on-secondary-fixed: #261900;
+  --color-surface-container: #efecf9;
+  --color-surface-tint: #2b685c;
+  --color-on-tertiary-container: #8dacff;
+  --color-secondary-fixed: #ffdea5;
+  --color-primary: #00322a;
+  --color-on-surface-variant: #3f4946;
+  --color-error: #ba1a1a;
+  --color-gold-accent: #C5A059;
+  --color-primary-fixed-dim: #95d3c4;
+  --color-outline: #707976;
+  --color-inverse-on-surface: #f2effc;
+  --color-surface-dim: #dbd8e5;
+  --color-primary-fixed: #b0efdf;
+  --color-inverse-primary: #95d3c4;
+  --color-surface-container-high: #e9e7f3;
+  --color-on-secondary: #ffffff;
+  --color-error-container: #ffdad6;
+  --color-surface-gray: #F6F6F6;
+  --color-on-tertiary-fixed: #001847;
+  --color-background: #fbf8ff;
+  --color-primary-container: #004b40;
+  --color-outline-variant: #bfc9c5;
+  --color-surface-variant: #e3e1ed;
+  --color-on-primary-container: #7dbaab;
+  --color-tertiary-fixed: #dae2ff;
+  --color-emerald-deep: #004B40;
+  --color-tertiary-fixed-dim: #b2c5ff;
+  --color-on-secondary-fixed-variant: #5d4201;
+  --color-secondary-fixed-dim: #e9c176;
+  --color-on-tertiary: #ffffff;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  vertical-align: middle;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+::-webkit-scrollbar {
+  width: 6px;
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c1c7cf;
+  border-radius: 10px;
+}
+
+.sidebar-scroll::-webkit-scrollbar-thumb {
+  background: #e2e2e6;
+}
+
+.chart-grid {
+  background-image: linear-gradient(#e2e2e6 1px, transparent 1px),
+    linear-gradient(90deg, #e2e2e6 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+.bento-card {
+  background: white;
+  border: 1px solid rgba(191, 201, 197, 0.35);
+  border-radius: 20px;
+  transition: all 0.2s ease;
+}
+
+.bento-card:hover {
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
+  border-color: rgba(191, 201, 197, 0.6);
+}
+
+.bento-section-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-outline);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.bento-section-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--color-outline-variant);
+  opacity: 0.4;
 }
