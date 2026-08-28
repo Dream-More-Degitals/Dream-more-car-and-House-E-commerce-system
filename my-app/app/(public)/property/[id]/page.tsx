@@ -2,6 +2,7 @@
 
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
+import { useState } from 'react'
 
 const properties: Record<string, {
   title: string; price: string; location: string; type: string;
@@ -36,96 +37,148 @@ export default function PropertyDetailPage() {
   const params = useParams()
   const id = params.id as string
   const property = properties[id] || { ...defaultProperty, title: `Property #${id}` }
+  const [activeImage, setActiveImage] = useState(0)
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-8">
-      <Link href="/" className="inline-flex items-center gap-1 text-sm text-on-surface-variant hover:text-primary mb-6 transition-colors">
-        <span className="material-symbols-outlined text-[16px]">arrow_back</span>
+    <div className="max-w-[1200px] mx-auto px-6 py-8">
+      {/* Breadcrumb */}
+      <Link
+        href="/search"
+        className="inline-flex items-center gap-1.5 text-[13px] text-gray-400 hover:text-emerald-deep mb-6 transition-colors group"
+      >
+        <span className="material-symbols-outlined text-[16px] group-hover:-translate-x-0.5 transition-transform">arrow_back</span>
         Back to listings
       </Link>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-6">
-          {/* Image Gallery */}
-          <div className="relative aspect-[16/10] rounded-2xl overflow-hidden bg-surface-container">
-            <img src={property.images[0]} alt={property.title} className="w-full h-full object-cover" />
+          {/* Main Image */}
+          <div className="relative aspect-[16/10] rounded-2xl overflow-hidden bg-gray-100 group">
+            <img
+              src={property.images[activeImage]}
+              alt={property.title}
+              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.02]"
+            />
+            {/* Badges */}
             <div className="absolute top-4 left-4 flex gap-2">
-              <span className="bg-verified-green text-white text-[10px] font-bold px-2.5 py-1 rounded-lg flex items-center gap-1">
-                <span className="material-symbols-outlined text-[12px]" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
+              <span className="badge-verified px-3 py-1.5 rounded-xl text-[11px] font-bold flex items-center gap-1.5 shadow-lg">
+                <span className="material-symbols-outlined text-[14px]" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
                 Verified
               </span>
-              <span className="bg-white/90 backdrop-blur-sm text-on-surface text-[10px] font-bold px-2.5 py-1 rounded-lg">{property.type}</span>
+              <span className="px-3 py-1.5 rounded-xl bg-white/90 backdrop-blur-sm text-gray-700 text-[11px] font-bold shadow-lg">
+                {property.type}
+              </span>
             </div>
-            <button className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center hover:bg-white transition-colors">
-              <span className="material-symbols-outlined text-[20px] text-on-surface-variant">favorite</span>
+            {/* Favorite */}
+            <button className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center text-gray-500 hover:text-red-500 hover:bg-white transition-all shadow-lg">
+              <span className="material-symbols-outlined text-[22px]">favorite</span>
             </button>
+            {/* Image counter */}
+            <div className="absolute bottom-4 right-4 px-3 py-1.5 rounded-lg bg-black/50 backdrop-blur-sm text-white text-[11px] font-semibold">
+              {activeImage + 1} / {property.images.length}
+            </div>
           </div>
 
-          {/* Thumbnail strip */}
+          {/* Thumbnails */}
           {property.images.length > 1 && (
-            <div className="flex gap-2">
+            <div className="flex gap-3">
               {property.images.map((img, i) => (
-                <div key={i} className="w-20 h-16 rounded-xl overflow-hidden border-2 border-primary/30">
+                <button
+                  key={i}
+                  onClick={() => setActiveImage(i)}
+                  className={`w-24 h-18 rounded-xl overflow-hidden border-2 transition-all duration-200 ${
+                    i === activeImage
+                      ? 'border-emerald-deep shadow-md shadow-emerald-deep/20'
+                      : 'border-gray-100 hover:border-gray-300 opacity-60 hover:opacity-100'
+                  }`}
+                >
                   <img src={img} alt="" className="w-full h-full object-cover" />
-                </div>
+                </button>
               ))}
             </div>
           )}
 
-          {/* Details */}
+          {/* Details Card */}
           <div className="bento-card p-6">
-            <h1 className="text-2xl font-bold text-on-surface">{property.title}</h1>
-            <div className="flex items-center gap-2 mt-2">
-              <span className="material-symbols-outlined text-[16px] text-on-surface-variant">location_on</span>
-              <span className="text-sm text-on-surface-variant">{property.location}</span>
+            <h1 className="text-[22px] font-extrabold text-gray-900">{property.title}</h1>
+            <div className="flex items-center gap-1.5 mt-2 text-gray-500">
+              <span className="material-symbols-outlined text-[16px]">location_on</span>
+              <span className="text-[13px]">{property.location}</span>
             </div>
-            <p className="text-2xl font-bold text-primary mt-4">{property.price}</p>
+            <p className="text-[24px] font-extrabold text-emerald-deep mt-4">{property.price}</p>
 
-            <div className="flex gap-6 mt-6 py-4 border-y border-outline-variant/30">
-              <div className="flex items-center gap-2">
-                <span className="material-symbols-outlined text-[18px] text-on-surface-variant">bed</span>
-                <span className="text-sm font-medium">{property.beds} Beds</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="material-symbols-outlined text-[18px] text-on-surface-variant">bathtub</span>
-                <span className="text-sm font-medium">{property.baths} Baths</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="material-symbols-outlined text-[18px] text-on-surface-variant">square_foot</span>
-                <span className="text-sm font-medium">{property.sqft} m²</span>
-              </div>
+            <div className="divider-glow my-5" />
+
+            <div className="flex gap-8">
+              {[
+                { icon: 'bed', label: `${property.beds} Beds` },
+                { icon: 'bathtub', label: `${property.baths} Baths` },
+                { icon: 'square_foot', label: `${property.sqft} m²` },
+              ].map((item) => (
+                <div key={item.label} className="flex items-center gap-2.5">
+                  <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center">
+                    <span className="material-symbols-outlined text-[20px] text-emerald-deep">{item.icon}</span>
+                  </div>
+                  <span className="text-[14px] font-semibold text-gray-700">{item.label}</span>
+                </div>
+              ))}
             </div>
 
-            <h2 className="text-base font-bold text-on-surface mt-6 mb-3">Description</h2>
-            <p className="text-sm text-on-surface-variant leading-relaxed">{property.description}</p>
+            <div className="divider-glow my-5" />
+
+            <h2 className="text-[15px] font-bold text-gray-900 mb-3">Description</h2>
+            <p className="text-[13px] text-gray-500 leading-relaxed">{property.description}</p>
           </div>
         </div>
 
         {/* Sidebar */}
-        <div className="space-y-4">
+        <div className="space-y-5">
           <div className="bento-card p-5 sticky top-24">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-11 h-11 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-bold text-sm">
+            {/* Seller Info */}
+            <div className="flex items-center gap-3 mb-5">
+              <div className="w-12 h-12 rounded-full bg-emerald-deep flex items-center justify-center text-white font-bold text-[14px] shadow-lg shadow-emerald-deep/20">
                 {property.seller.split(' ').map(n => n[0]).join('')}
               </div>
               <div>
-                <p className="text-sm font-semibold text-on-surface">{property.seller}</p>
-                <p className="text-[11px] text-on-surface-variant">Verified Seller</p>
+                <p className="text-[14px] font-bold text-gray-900">{property.seller}</p>
+                <p className="text-[11px] text-emerald-deep font-semibold flex items-center gap-1">
+                  <span className="material-symbols-outlined text-[12px]" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
+                  Verified Seller
+                </p>
               </div>
             </div>
-            <button className="w-full py-2.5 bg-primary-container text-on-primary-container rounded-xl text-sm font-semibold hover:opacity-90 transition-opacity flex items-center justify-center gap-2 mb-2">
-              <span className="material-symbols-outlined text-[16px]">chat</span>
+
+            {/* CTA Buttons */}
+            <button className="w-full py-3 bg-emerald-deep text-white rounded-xl text-[13px] font-bold hover:bg-emerald-deep/90 active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2 shadow-lg shadow-emerald-deep/20 mb-2.5">
+              <span className="material-symbols-outlined text-[18px]">chat</span>
               Contact Seller
             </button>
-            <button className="w-full py-2.5 border border-outline-variant/50 text-on-surface-variant rounded-xl text-sm font-medium hover:bg-surface-container-low transition-colors flex items-center justify-center gap-2">
-              <span className="material-symbols-outlined text-[16px]">calendar_month</span>
+            <button className="w-full py-3 border border-gray-200 text-gray-600 rounded-xl text-[13px] font-semibold hover:bg-gray-50 active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2">
+              <span className="material-symbols-outlined text-[18px]">calendar_month</span>
               Schedule Viewing
             </button>
-            <div className="mt-4 pt-4 border-t border-outline-variant/30">
-              <div className="flex items-center gap-2 text-sm text-on-surface-variant">
-                <span className="material-symbols-outlined text-[16px]">call</span>
-                {property.sellerPhone}
-              </div>
+
+            <div className="divider-glow my-4" />
+
+            {/* Phone */}
+            <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
+              <span className="material-symbols-outlined text-[18px] text-gray-400">call</span>
+              <span className="text-[13px] font-semibold text-gray-700">{property.sellerPhone}</span>
+            </div>
+
+            {/* Trust Badges */}
+            <div className="mt-4 grid grid-cols-2 gap-2">
+              {[
+                { icon: 'verified_user', label: 'Verified' },
+                { icon: 'shield', label: 'Secure' },
+                { icon: 'support_agent', label: '24/7 Support' },
+                { icon: 'payments', label: 'Safe Pay' },
+              ].map((badge) => (
+                <div key={badge.label} className="flex items-center gap-1.5 p-2 bg-gray-50 rounded-lg">
+                  <span className="material-symbols-outlined text-[14px] text-emerald-deep">{badge.icon}</span>
+                  <span className="text-[10px] font-semibold text-gray-600">{badge.label}</span>
+                </div>
+              ))}
             </div>
           </div>
         </div>

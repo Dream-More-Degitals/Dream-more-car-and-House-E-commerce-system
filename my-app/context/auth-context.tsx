@@ -92,7 +92,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return null
   })
   const [isLoading, setIsLoading] = useState(false)
-  const lastActivityRef = useRef(Date.now())
+  const lastActivityRef = useRef(0)
 
   // Session timeout check
   useEffect(() => {
@@ -131,7 +131,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return { success: false, error: 'Invalid email or password' }
     }
 
-    const { password: _pw, ...userData } = found
+    const { password: _, ...userData } = found
     setUser(userData)
     localStorage.setItem('dreammore-session', JSON.stringify({ user: userData }))
     setIsLoading(false)

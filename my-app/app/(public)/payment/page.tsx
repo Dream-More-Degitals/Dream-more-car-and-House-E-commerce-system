@@ -2,9 +2,9 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/Button'
 import { useAuth } from '@/context/auth-context'
+import { formatPrice } from '@/lib/utils'
 
 type PaymentMethod = 'chapa' | 'telebirr' | 'cbe'
 type PaymentStep = 'select' | 'confirm' | 'processing' | 'success' | 'failed'
@@ -23,7 +23,6 @@ const PAYMENT_SERVICES: PaymentDetails[] = [
 ]
 
 export default function PaymentPage() {
-  const router = useRouter()
   const { } = useAuth()
   const [selectedService, setSelectedService] = useState<PaymentDetails | null>(null)
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('chapa')

@@ -1,268 +1,409 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useState } from 'react'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+
+const HERO_IMAGE = 'https://lh3.googleusercontent.com/aida-public/AB6AXuB35W4Oqg13F09sTET4l3Caj9EH9TNk551QvtHxdY-TrSNtVEL-vpmacGe93A42uYzgguYUv5TmAHYff_XJKsuQKYV4BJv7VQLnMZ6T-8ikBkZL5f_VuFtLGPyND0DVrCqpX-AnE_iQ0ORGyYNEHu_vDq2ssRdBF8-wyCUg4SixOsRW_i0Tqw8eaI7lBIfBQ_XkRzTPGEP39D-Ehm6ldGT0tnrRTO00fwYtmBxBddIPI3GwCDDR_lHA'
+
+const PROPERTIES = [
+  {
+    id: 'prop-1',
+    title: 'Luxury Villa in Bole',
+    location: 'Bole, Addis Ababa',
+    price: '15,500,000',
+    beds: 4,
+    baths: 3,
+    sqft: '350',
+    featured: true,
+    verified: true,
+    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCd5_SxpSbw2w8rLXd0yAxVG2ZNLkd6RweTfVKe_tUW6vg0A0OBYWtKh0sXQE5wRfR12Hh6oH1c42MsTZC9vMfFW5kQVaxTBw2PF7A1X8Fl_ebfsmWje29_jVpbPeXpemqLKb1UDqJSFOZiENnJePCRt4Gv3SLVzQ7jK71AjahZxa7jpCUoaexRdmk_KC2WkCV7bPuvZaRfDUK2K96NCL_g4GNcW9PiXxXpd-JQR9i09w0HgHVS4HHx)',
+  },
+  {
+    id: 'prop-2',
+    title: 'Modern Penthouse',
+    location: 'Kazanchis, Addis Ababa',
+    price: '8,200,000',
+    beds: 2,
+    baths: 2,
+    sqft: '180',
+    featured: false,
+    verified: false,
+    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCcY8Ev8uoJDJqsSjKsvJze4FEDEvxJ3sP-R7c8JvGqH3PNcuyIe6qTwV2GzxnNZBRsXByw1MG2xO4RAr7dNdYWrl1_MvgjD60uDgvpyz8mybSzre2rTHxyXe3CyWnSjJOYcKN_NFttlthP2rMcEKZRER29gCGcFZz1nw65plGuKWrB76-6e5-Rbwt7ooBjwzaJb4OrEB6hdf09e_Wn8DRnwmwE-SCgVpPOe6NxUPKNoygnIHCN_NA6)',
+  },
+  {
+    id: 'prop-3',
+    title: 'Entoto Heights Estate',
+    location: 'Entoto, Addis Ababa',
+    price: '22,000,000',
+    beds: 5,
+    baths: 5,
+    sqft: '1,200',
+    featured: true,
+    verified: true,
+    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDHaeQYRgnfrjOK07qtTtX7uX3wFEUQIxAf1ZJiSPvgVrakl7JzKGAF1rsiakWPX1fysWm4sKfdV6nRqGPn0UzggJ6MOW5-LmWZRtK2NIX0I8w-HUAz2Srt3VuA-8Ej0RE_06HLC_lM5SdGkpX-fsM_7a1r9CuWAGNUs3NyttQ5cx7g_XoSHMnmyf-MUYLAwI4erGcjS-_C8Zo_o3IVrFgNbKuaH4xlOX9SKyxODRqpA_4xjhPkdMfX)',
+  },
+]
+
+const VEHICLES = [
+  {
+    id: 'veh-1',
+    title: 'Toyota Land Cruiser 300',
+    year: 2023,
+    km: '5,000',
+    fuel: 'Diesel',
+    price: '12.5M',
+    isNew: true,
+    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAA-B7fKGmtSCFRyp9PPW0gPySeJ4U9JLRugKMa6-f_LEBSgcWM7UWDpjQTnRCeUT6lIaQ0fSULq_V3JaObG_hKLeZ1Dq-Qt2schRNUtWYRGyIUP5pT7YTVBSaEeZXWi2zWvne1L-JMBe4iflWrl2bTaiJ3sAATBPOI_s_-G11JDsq8-iyPLxZlKVH4q6xXgvHFv1RTh7Ksk-aJs1MW3n1uTxvWdfzeDz7KIMkIpLFSzXf2EmPV0RSO)',
+  },
+  {
+    id: 'veh-2',
+    title: 'Mercedes-Benz G63 AMG',
+    year: 2022,
+    km: '12,000',
+    fuel: 'Petrol',
+    price: '18.2M',
+    isNew: false,
+    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAwBtg6S7VwLDjHtAnlFq1sh5tD7B4gLYisPMJj7V0bREb6pFZdwnYoyC7P5Stwh6wvwVVHZNh-5imT-Jpoxm77s5kgbo6f65Whu7ZNcAVPOBM31VdWoSI5_EHKIwvS9EA_gYl8E4GzcFqmA5ybXdHZ0H63Ox7cvGNq6j2heiF9JUdR4wCpbuUgd5xj12Y4eO7wxrFjoTk1eWX1TGw6JuP4W3q4z1Wtdjz_Xcg5M49RvPayYraw0AV7)',
+  },
+  {
+    id: 'veh-3',
+    title: 'Hyundai Tucson Hybrid',
+    year: 2021,
+    km: '25,000',
+    fuel: 'Hybrid',
+    price: '4.8M',
+    isNew: false,
+    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuA0KyHLeTCCbxRa5RpZNLt8UDcubYED9EUacrJlUiyzlZtknoBfQpDvH2BrKZGXewnhtBsMPvUY5fXzb8zmyMd7mBjgREOgV51y_8wu7cxdRSgoislMIudt5oyQLbbNUBsTjIohRwBVdGu8UAct3Eu5EFbgluAcizmocUtlhvZD4sCThM9vNjpgwtx6Y9qaDhzMYTH2GfxnBsFTUTrSYIIKlL2gDLMUTG5c_-0VHvJuntFcnau52AIw)',
+  },
+  {
+    id: 'veh-4',
+    title: 'Range Rover Velar',
+    year: 2020,
+    km: '35,000',
+    fuel: 'Petrol',
+    price: '9.5M',
+    isNew: false,
+    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCDM1VKqpIZTBbC6oQtwU1uay3DXVXXDbNIvisvMv8DcQd3sgoXANuC9Pv_Xmwnh3KMV_sSy0x-UmMxGklSVIkEO-2Skj__J1zGRQ4QMShbrA99CSyQt0E-xKCAW5GHVOSpyca4stbiTdJivzqC4pKTK-AegbT0xjEhwhs6y7bzjrpDs5j7LbjWx4EF_Kqas1a910bL-Asd8LXOoEGr6Stmq12FXeN39h34TDu8iqksq_hjhfO9uhPb)',
+  },
+]
+
+const CATEGORIES = [
+  { icon: 'apartment', label: 'Apartments', color: 'emerald', href: '/search?type=apartment' },
+  { icon: 'villa', label: 'Villas', color: 'blue', href: '/search?type=villa' },
+  { icon: 'directions_car', label: 'SUVs', color: 'amber', href: '/search?type=suv' },
+  { icon: 'local_shipping', label: 'Trucks', color: 'slate', href: '/search?type=truck' },
+]
 
 export default function PublicPage() {
-  useEffect(() => {
-    const toggleHouses = document.getElementById('toggle-houses')
-    const toggleCars = document.getElementById('toggle-cars')
+  const [searchType, setSearchType] = useState<'property' | 'vehicle'>('property')
+  const [searchQuery, setSearchQuery] = useState('')
+  const router = useRouter()
 
-    if (toggleHouses && toggleCars) {
-      toggleHouses.addEventListener('click', () => {
-        toggleHouses.classList.add('bg-white', 'text-emerald-deep', 'shadow-sm')
-        toggleHouses.classList.remove('text-on-surface-variant')
-        toggleCars.classList.remove('bg-white', 'text-emerald-deep', 'shadow-sm')
-        toggleCars.classList.add('text-on-surface-variant')
-      })
-
-      toggleCars.addEventListener('click', () => {
-        toggleCars.classList.add('bg-white', 'text-emerald-deep', 'shadow-sm')
-        toggleCars.classList.remove('text-on-surface-variant')
-        toggleHouses.classList.remove('bg-white', 'text-emerald-deep', 'shadow-sm')
-        toggleHouses.classList.add('text-on-surface-variant')
-      })
-    }
-
-    const handleScroll = () => {
-      const nav = document.querySelector('nav')
-      if (window.scrollY > 50) {
-        nav?.classList.add('shadow-md')
-      } else {
-        nav?.classList.remove('shadow-md')
-      }
-    }
-
-    window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
+  const handleSearch = () => {
+    router.push(`/search?q=${encodeURIComponent(searchQuery)}&type=${searchType}`)
+  }
 
   return (
     <>
-      {/* Hero Section with Search */}
-      <section className="relative h-[600px] flex items-center justify-center overflow-hidden">
-        <div className="absolute inset-0 z-0" style={{ backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuB35W4Oqg13F09sTET4l3Caj9EH9TNk551QvtHxdY-TrSNtVEL-vpmacGe93A42uYzgguYUv5TmAHYff_XJKsuQKYV4BJv7VQLnMZ6T-8ikBkZL5f_VuFtLGPyND0DVrCqpX-AnE_iQ0ORGyYNEHu_vDq2ssRdBF8-wyCUg4SixOsRW_i0Tqw8eaI7lBIfBQ_XkRzTPGEP39D-Ehm6ldGT0tnrRTO00fwYtmBxBddIPI3GwCDDR_lHA')" }}></div>
-        <div className="absolute inset-0 bg-black/30 z-10"></div>
-        <div className="relative z-20 w-full max-w-container-max px-margin-desktop text-center">
-          <h1 className="font-display-lg text-display-lg text-white mb-stack-lg drop-shadow-md">Find Your Dream Space in Ethiopia</h1>
-          {/* Search Component */}
-          <div className="bg-white p-2 rounded shadow-2xl max-w-3xl mx-auto flex flex-col md:flex-row items-center gap-2">
-            {/* Category Toggle */}
-            <div className="flex bg-surface-container p-1 rounded w-full md:w-auto">
-              <button className="flex-1 md:flex-none px-6 py-2 rounded font-label-md text-label-md bg-white text-emerald-deep shadow-sm transition-all" id="toggle-houses">Houses</button>
-              <button className="flex-1 md:flex-none px-6 py-2 rounded font-label-md text-label-md text-on-surface-variant hover:text-emerald-deep transition-all" id="toggle-cars">Cars</button>
+      {/* ═══════════════════════════════════════════════════════
+          HERO SECTION — bg-cover bg-center bg-no-repeat
+          ═══════════════════════════════════════════════════════ */}
+      <section className="hero-bg flex items-center justify-center" style={{ backgroundImage: `url('${HERO_IMAGE}')` }}>
+        <div className="hero-content w-full max-w-[1200px] mx-auto px-6 py-20 text-center">
+          <span className="inline-block px-4 py-1.5 rounded-full bg-white/15 text-white text-[11px] font-semibold tracking-wider uppercase mb-6 animate-fade-in-up">
+            Ethiopia&apos;s Premier Marketplace
+          </span>
+
+          <h1 className="text-white mb-4 animate-fade-in-up animate-delay-100" style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)', fontWeight: 800, lineHeight: 1.1 }}>
+            Find Your Dream Space
+          </h1>
+          <p className="text-white/80 text-lg mb-10 max-w-xl mx-auto animate-fade-in-up animate-delay-200">
+            Premium properties &amp; vehicles across Bole, Hawassa, Adama, and beyond.
+          </p>
+
+          {/* ── Search Bar Pop ── */}
+          <div className="search-bar-pop max-w-3xl mx-auto animate-fade-in-up animate-delay-300">
+            <div className="flex flex-col md:flex-row items-stretch md:items-center gap-2 p-2">
+              {/* Type Toggle */}
+              <div className="flex bg-gray-100 rounded-xl p-1 shrink-0">
+                <button
+                  onClick={() => setSearchType('property')}
+                  className={`flex-1 md:flex-none px-5 py-2.5 rounded-lg text-[13px] font-semibold transition-all duration-300 ${
+                    searchType === 'property'
+                      ? 'bg-emerald-deep text-white shadow-md shadow-emerald-deep/20'
+                      : 'text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  <span className="material-symbols-outlined text-[18px] mr-1 align-middle">apartment</span>
+                  Properties
+                </button>
+                <button
+                  onClick={() => setSearchType('vehicle')}
+                  className={`flex-1 md:flex-none px-5 py-2.5 rounded-lg text-[13px] font-semibold transition-all duration-300 ${
+                    searchType === 'vehicle'
+                      ? 'bg-emerald-deep text-white shadow-md shadow-emerald-deep/20'
+                      : 'text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  <span className="material-symbols-outlined text-[18px] mr-1 align-middle">directions_car</span>
+                  Vehicles
+                </button>
+              </div>
+
+              {/* Search Input */}
+              <div className="flex-1 flex items-center gap-2 bg-gray-50 rounded-xl px-4 py-2.5 border border-gray-100 focus-within:border-emerald-deep/30 focus-within:bg-white transition-all">
+                <span className="material-symbols-outlined text-gray-400 text-[20px]">search</span>
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                  placeholder={searchType === 'property' ? 'Location, neighborhood, or ZIP' : 'Make, model, or year'}
+                  className="w-full bg-transparent text-[13px] text-gray-800 placeholder:text-gray-400 outline-none"
+                />
+              </div>
+
+              {/* Search Button */}
+              <button
+                onClick={handleSearch}
+                className="px-8 py-3 bg-emerald-deep text-white rounded-xl text-[13px] font-bold hover:bg-emerald-deep/90 active:scale-[0.98] transition-all duration-200 shadow-lg shadow-emerald-deep/25"
+              >
+                Search
+              </button>
             </div>
-            {/* Search Inputs */}
-            <div className="flex-1 w-full relative flex items-center">
-              <span className="material-symbols-outlined absolute left-4 text-outline">search</span>
-              <input className="w-full pl-12 pr-4 py-3 border-none focus:ring-0 text-on-surface font-body-md text-body-md bg-transparent" placeholder="Search by Location, Category, or keyword" type="text" />
-            </div>
-            <button className="w-full md:w-auto px-10 py-3 bg-emerald-deep text-white font-label-md text-label-md hover:bg-opacity-95 transition-all">Search</button>
           </div>
-          <p className="text-white mt-stack-md font-body-md text-body-md opacity-90">Premium listings in Bole, Adama, Hawassa, and more.</p>
+
+          {/* Trust Indicators */}
+          <div className="flex flex-wrap items-center justify-center gap-6 mt-8 animate-fade-in-up animate-delay-400">
+            {[
+              { icon: 'verified_user', text: '100% Verified Listings' },
+              { icon: 'payments', text: 'Secure Payments' },
+              { icon: 'support_agent', text: '24/7 Support' },
+            ].map((item) => (
+              <div key={item.text} className="flex items-center gap-2 text-white/70 text-[12px]">
+                <span className="material-symbols-outlined text-[16px]">{item.icon}</span>
+                {item.text}
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
-      {/* Quick Category Links */}
-      <section className="py-stack-lg max-w-container-max mx-auto px-margin-desktop">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-gutter">
-          <a className="group flex flex-col items-center p-stack-lg border border-outline-variant hover:border-emerald-deep transition-all rounded-lg bg-white" href="#">
-            <div className="w-16 h-16 rounded-full bg-surface-container-low flex items-center justify-center mb-stack-sm group-hover:bg-emerald-deep/10 transition-colors">
-              <span className="material-symbols-outlined text-emerald-deep text-3xl">apartment</span>
-            </div>
-            <span className="font-label-md text-label-md text-on-surface">Apartments</span>
-          </a>
-          <a className="group flex flex-col items-center p-stack-lg border border-outline-variant hover:border-emerald-deep transition-all rounded-lg bg-white" href="#">
-            <div className="w-16 h-16 rounded-full bg-surface-container-low flex items-center justify-center mb-stack-sm group-hover:bg-emerald-deep/10 transition-colors">
-              <span className="material-symbols-outlined text-emerald-deep text-3xl">villa</span>
-            </div>
-            <span className="font-label-md text-label-md text-on-surface">Villas</span>
-          </a>
-          <a className="group flex flex-col items-center p-stack-lg border border-outline-variant hover:border-emerald-deep transition-all rounded-lg bg-white" href="#">
-            <div className="w-16 h-16 rounded-full bg-surface-container-low flex items-center justify-center mb-stack-sm group-hover:bg-emerald-deep/10 transition-colors">
-              <span className="material-symbols-outlined text-emerald-deep text-3xl">csv</span>
-            </div>
-            <span className="font-label-md text-label-md text-on-surface">SUVs</span>
-          </a>
-          <a className="group flex flex-col items-center p-stack-lg border border-outline-variant hover:border-emerald-deep transition-all rounded-lg bg-white" href="#">
-            <div className="w-16 h-16 rounded-full bg-surface-container-low flex items-center justify-center mb-stack-sm group-hover:bg-emerald-deep/10 transition-colors">
-              <span className="material-symbols-outlined text-emerald-deep text-3xl">local_shipping</span>
-            </div>
-            <span className="font-label-md text-label-md text-on-surface">Trucks</span>
-          </a>
+      {/* ═══════════════════════════════════════════════════════
+          CATEGORIES — Standardized Icon Containers
+          ═══════════════════════════════════════════════════════ */}
+      <section className="py-14 max-w-[1200px] mx-auto px-6">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 stagger-children">
+          {CATEGORIES.map((cat) => (
+            <Link
+              key={cat.label}
+              href={cat.href}
+              className="group flex flex-col items-center gap-4 p-6 rounded-2xl border border-gray-100 bg-white hover:border-emerald-deep/20 hover:shadow-lg hover:shadow-emerald-deep/5 transition-all duration-300"
+            >
+              <div className={`category-icon category-icon-${cat.color}`}>
+                <span className="material-symbols-outlined text-[26px]">{cat.icon}</span>
+              </div>
+              <span className="text-[13px] font-semibold text-gray-700 group-hover:text-emerald-deep transition-colors">
+                {cat.label}
+              </span>
+            </Link>
+          ))}
         </div>
       </section>
 
-      {/* Featured Properties */}
-      <section className="py-16 bg-surface-gray">
-        <div className="max-w-container-max mx-auto px-margin-desktop">
-          <div className="flex justify-between items-end mb-10">
-            <div>
-              <h2 className="font-headline-lg text-headline-lg text-primary mb-2">Featured Properties</h2>
-              <p className="font-body-md text-body-md text-on-surface-variant">Handpicked high-value real estate across Ethiopia.</p>
-            </div>
-            <a className="text-zillow-blue font-label-md text-label-md flex items-center gap-1 hover:underline" href="#">
-              View All Properties <span className="material-symbols-outlined text-sm">arrow_forward</span>
-            </a>
+      <div className="divider-glow mx-6" />
+
+      {/* ═══════════════════════════════════════════════════════
+          FEATURED PROPERTIES — Premium Cards
+          ═══════════════════════════════════════════════════════ */}
+      <section className="py-16 max-w-[1200px] mx-auto px-6">
+        <div className="flex justify-between items-end mb-10">
+          <div>
+            <span className="bento-section-label">Handpicked</span>
+            <h2 className="text-[22px] font-bold text-gray-900">Featured Properties</h2>
+            <p className="text-[13px] text-gray-500 mt-1">High-value real estate across Ethiopia.</p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-gutter">
-            {/* Property Card 1 */}
-            <div className="bg-white border border-outline-variant group cursor-pointer overflow-hidden flex flex-col">
+          <Link href="/search?type=property" className="hidden sm:flex items-center gap-1 text-[13px] font-semibold text-emerald-deep hover:underline">
+            View All <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
+          </Link>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 stagger-children">
+          {PROPERTIES.map((prop) => (
+            <Link key={prop.id} href={`/property/${prop.id}`} className="premium-card group">
+              {/* Image */}
               <div className="relative aspect-[4/3] overflow-hidden">
-                <div className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110" style={{ backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuCd5_SxpSbw2w8rLXd0yAxVG2ZNLkd6RweTfVKe_tUW6vg0A0OBYWtKh0sXQE5wRfR12Hh6oH1c42MsTZC9vMfFW5kQVaxTBw2PF7A1X8Fl_ebfsmWje29_jVpbPeXpemqLKb1UDqJSFOZiENnJePCRt4Gv3SLVzQ7jK71AjahZxa7jpCUoaexRdmk_KC2WkCV7bPuvZaRfDUK2K96NCL_g4GNcW9PiXxXpd-JQR9i09w0HgHVS4HHx')" }}></div>
-                <div className="absolute top-4 left-4 bg-gold-accent text-white px-3 py-1 font-label-sm text-label-sm rounded-sm">Featured</div>
-                <button className="absolute top-4 right-4 text-white material-symbols-outlined hover:text-error transition-colors" style={{ fontVariationSettings: "'FILL' 0" }}>favorite</button>
-                <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent">
-                  <span className="text-white font-headline-md text-headline-md">15,500,000 ETB</span>
+                <div
+                  className="card-image absolute inset-0 bg-cover bg-center bg-no-repeat"
+                  style={{ backgroundImage: `url('${prop.image}')` }}
+                />
+                {/* Badges */}
+                <div className="absolute top-3 left-3 flex items-center gap-2">
+                  {prop.featured && (
+                    <span className="badge-featured px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider flex items-center gap-1">
+                      <span className="material-symbols-outlined text-[12px]" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
+                      Featured
+                    </span>
+                  )}
+                  {prop.verified && (
+                    <span className="badge-verified px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider flex items-center gap-1">
+                      <span className="material-symbols-outlined text-[12px]" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
+                      Verified
+                    </span>
+                  )}
+                </div>
+                {/* Favorite */}
+                <button className="absolute top-3 right-3 w-9 h-9 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center text-gray-600 hover:text-red-500 hover:bg-white transition-all shadow-sm" onClick={(e) => e.preventDefault()}>
+                  <span className="material-symbols-outlined text-[20px]" style={{ fontVariationSettings: "'FILL' 0" }}>favorite</span>
+                </button>
+                {/* Price */}
+                <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 via-black/40 to-transparent">
+                  <span className="text-white text-[20px] font-extrabold">Br {prop.price}</span>
+                  <span className="text-white/60 text-[12px] ml-1">/sale</span>
                 </div>
               </div>
-              <div className="p-stack-lg flex-1">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="bg-verified-green/10 text-verified-green px-2 py-0.5 rounded text-[10px] font-bold flex items-center gap-1 uppercase tracking-wider">
-                    <span className="material-symbols-outlined text-[12px]" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span> Verified
+
+              {/* Content */}
+              <div className="p-5">
+                <h3 className="text-[15px] font-bold text-gray-900 mb-1 group-hover:text-emerald-deep transition-colors">
+                  {prop.title}
+                </h3>
+                <p className="text-[12px] text-gray-500 flex items-center gap-1 mb-4">
+                  <span className="material-symbols-outlined text-[14px]">location_on</span>
+                  {prop.location}
+                </p>
+                <div className="divider-glow mb-4" />
+                <div className="flex items-center gap-4 text-gray-500 text-[12px]">
+                  <span className="flex items-center gap-1.5">
+                    <span className="material-symbols-outlined text-[15px]">bed</span>
+                    {prop.beds} Beds
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <span className="material-symbols-outlined text-[15px]">bathtub</span>
+                    {prop.baths} Baths
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <span className="material-symbols-outlined text-[15px]">square_foot</span>
+                    {prop.sqft} m²
                   </span>
                 </div>
-                <h3 className="font-title-lg text-title-lg text-on-surface mb-1">Luxury Villa in Bole</h3>
-                <p className="text-on-surface-variant font-body-md text-body-md mb-4">Bole, Addis Ababa</p>
-                <div className="flex items-center gap-4 text-on-surface-variant border-t border-outline-variant pt-4">
-                  <div className="flex items-center gap-1"><span className="material-symbols-outlined text-sm">bed</span> <span className="text-sm font-label-md">4 Beds</span></div>
-                  <div className="flex items-center gap-1"><span className="material-symbols-outlined text-sm">bathtub</span> <span className="text-sm font-label-md">3 Baths</span></div>
-                  <div className="flex items-center gap-1"><span className="material-symbols-outlined text-sm">square_foot</span> <span className="text-sm font-label-md">350 m²</span></div>
-                </div>
               </div>
-            </div>
-            {/* Property Card 2 */}
-            <div className="bg-white border border-outline-variant group cursor-pointer overflow-hidden flex flex-col">
-              <div className="relative aspect-[4/3] overflow-hidden">
-                <div className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110" style={{ backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuCcY8Ev8uoJDJqsSjKsvJze4FEDEvxJ3sP-R7c8JvGqH3PNcuyIe6qTwV2GzxnNZBRsXByw1MG2xO4RAr7dNdYWrl1_MvgjD60uDgvpyz8mybSzre2rTHxyXe3CyWnSjJOYcKN_NFttlthP2rMcEKZRER29gCGcFZz1nw65plGuKWrB76-6e5-Rbwt7ooBjwzaJb4OrEB6hdf09e_Wn8DRnwmwE-SCgVpPOe6NxUPKNoygnIHCN_NA6')" }}></div>
-                <button className="absolute top-4 right-4 text-white material-symbols-outlined hover:text-error transition-colors">favorite</button>
-                <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent">
-                  <span className="text-white font-headline-md text-headline-md">8,200,000 ETB</span>
-                </div>
-              </div>
-              <div className="p-stack-lg flex-1">
-                <h3 className="font-title-lg text-title-lg text-on-surface mb-1">Modern Penthouse</h3>
-                <p className="text-on-surface-variant font-body-md text-body-md mb-4">Kazanchis, Addis Ababa</p>
-                <div className="flex items-center gap-4 text-on-surface-variant border-t border-outline-variant pt-4">
-                  <div className="flex items-center gap-1"><span className="material-symbols-outlined text-sm">bed</span> <span className="text-sm font-label-md">2 Beds</span></div>
-                  <div className="flex items-center gap-1"><span className="material-symbols-outlined text-sm">bathtub</span> <span className="text-sm font-label-md">2 Baths</span></div>
-                  <div className="flex items-center gap-1"><span className="material-symbols-outlined text-sm">square_foot</span> <span className="text-sm font-label-md">180 m²</span></div>
-                </div>
-              </div>
-            </div>
-            {/* Property Card 3 */}
-            <div className="bg-white border border-outline-variant group cursor-pointer overflow-hidden flex flex-col">
-              <div className="relative aspect-[4/3] overflow-hidden">
-                <div className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110" style={{ backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuDHaeQYRgnfrjOK07qtTtX7uX3wFEUQIxAf1ZJiSPvgVrakl7JzKGAF1rsiakWPX1fysWm4sKfdV6nRqGPn0UzggJ6MOW5-LmWZRtK2NIX0I8w-HUAz2Srt3VuA-8Ej0RE_06HLC_lM5SdGkpX-fsM_7a1r9CuWAGNUs3NyttQ5cx7g_XoSHMnmyf-MUYLAwI4erGcjS-_C8Zo_o3IVrFgNbKuaH4xlOX9SKyxODRqpA_4xjhPkdMfX')" }}></div>
-                <div className="absolute top-4 left-4 bg-gold-accent text-white px-3 py-1 font-label-sm text-label-sm rounded-sm">Featured</div>
-                <button className="absolute top-4 right-4 text-white material-symbols-outlined hover:text-error transition-colors">favorite</button>
-                <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent">
-                  <span className="text-white font-headline-md text-headline-md">22,000,000 ETB</span>
-                </div>
-              </div>
-              <div className="p-stack-lg flex-1">
-                <h3 className="font-title-lg text-title-lg text-on-surface mb-1">Entoto Heights Estate</h3>
-                <p className="text-on-surface-variant font-body-md text-body-md mb-4">Entoto, Addis Ababa</p>
-                <div className="flex items-center gap-4 text-on-surface-variant border-t border-outline-variant pt-4">
-                  <div className="flex items-center gap-1"><span className="material-symbols-outlined text-sm">bed</span> <span className="text-sm font-label-md">5 Beds</span></div>
-                  <div className="flex items-center gap-1"><span className="material-symbols-outlined text-sm">bathtub</span> <span className="text-sm font-label-md">5 Baths</span></div>
-                  <div className="flex items-center gap-1"><span className="material-symbols-outlined text-sm">square_foot</span> <span className="text-sm font-label-md">1,200 m²</span></div>
-                </div>
-              </div>
-            </div>
-          </div>
+            </Link>
+          ))}
+        </div>
+
+        <div className="mt-8 text-center sm:hidden">
+          <Link href="/search?type=property" className="inline-flex items-center gap-1 text-[13px] font-semibold text-emerald-deep hover:underline">
+            View All Properties <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
+          </Link>
         </div>
       </section>
 
-      {/* Premium Vehicles */}
-      <section className="py-16">
-        <div className="max-w-container-max mx-auto px-margin-desktop">
+      {/* ═══════════════════════════════════════════════════════
+          PREMIUM VEHICLES — Premium Cards
+          ═══════════════════════════════════════════════════════ */}
+      <section className="py-16 bg-gray-50/80">
+        <div className="max-w-[1200px] mx-auto px-6">
           <div className="flex justify-between items-end mb-10">
             <div>
-              <h2 className="font-headline-lg text-headline-lg text-primary mb-2">Premium Vehicles</h2>
-              <p className="font-body-md text-body-md text-on-surface-variant">Top-tier automotive excellence for Ethiopian roads.</p>
+              <span className="bento-section-label">Top Tier</span>
+              <h2 className="text-[22px] font-bold text-gray-900">Premium Vehicles</h2>
+              <p className="text-[13px] text-gray-500 mt-1">Automotive excellence for Ethiopian roads.</p>
             </div>
-            <a className="text-zillow-blue font-label-md text-label-md flex items-center gap-1 hover:underline" href="#">
-              View All Vehicles <span className="material-symbols-outlined text-sm">arrow_forward</span>
-            </a>
+            <Link href="/search?type=vehicle" className="hidden sm:flex items-center gap-1 text-[13px] font-semibold text-emerald-deep hover:underline">
+              View All <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
+            </Link>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-gutter">
-            {/* Vehicle Card 1 */}
-            <div className="bg-white border border-outline-variant group cursor-pointer flex flex-col shadow-sm hover:shadow-md transition-all">
-              <div className="relative aspect-[4/3] overflow-hidden">
-                <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuAA-B7fKGmtSCFRyp9PPW0gPySeJ4U9JLRugKMa6-f_LEBSgcWM7UWDpjQTnRCeUT6lIaQ0fSULq_V3JaObG_hKLeZ1Dq-Qt2schRNUtWYRGyIUP5pT7YTVBSaEeZXWi2zWvne1L-JMBe4iflWrl2bTaiJ3sAATBPOI_s_-G11JDsq8-iyPLxZlKVH4q6xXgvHFv1RTh7Ksk-aJs1MW3n1uTxvWdfzeDz7KIMkIpLFSzXf2EmPV0RSO')" }}></div>
-                <div className="absolute top-3 left-3 bg-emerald-deep text-white px-2 py-0.5 rounded-sm font-label-sm text-[10px] uppercase">New Arrival</div>
-                <div className="absolute bottom-3 left-3">
-                  <span className="text-white font-bold text-lg bg-black/40 px-2 py-1 rounded">12.5M ETB</span>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 stagger-children">
+            {VEHICLES.map((veh) => (
+              <Link key={veh.id} href={`/property/${veh.id}`} className="premium-card group">
+                {/* Image */}
+                <div className="relative aspect-[4/3] overflow-hidden">
+                  <div
+                    className="card-image absolute inset-0 bg-cover bg-center bg-no-repeat"
+                    style={{ backgroundImage: `url('${veh.image}')` }}
+                  />
+                  {veh.isNew && (
+                    <span className="absolute top-3 left-3 badge-rent px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider">
+                      New Arrival
+                    </span>
+                  )}
+                  <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/80 via-black/40 to-transparent">
+                    <span className="text-white text-[18px] font-extrabold">Br {veh.price}</span>
+                  </div>
                 </div>
-              </div>
-              <div className="p-4">
-                <h4 className="font-label-md text-label-md text-on-surface mb-1">Toyota Land Cruiser 300</h4>
-                <p className="text-sm text-on-surface-variant mb-3">2023 &bull; 5,000 km &bull; Diesel</p>
-                <button className="w-full py-2 border border-emerald-deep text-emerald-deep font-label-md text-label-md rounded hover:bg-emerald-deep hover:text-white transition-all">View Details</button>
-              </div>
-            </div>
-            {/* Vehicle Card 2 */}
-            <div className="bg-white border border-outline-variant group cursor-pointer flex flex-col shadow-sm hover:shadow-md transition-all">
-              <div className="relative aspect-[4/3] overflow-hidden">
-                <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuAwBtg6S7VwLDjHtAnlFq1sh5tD7B4gLYisPMJj7V0bREb6pFZdwnYoyC7P5Stwh6wvwVVHZNh-5imT-Jpoxm77s5kgbo6f65Whu7ZNcAVPOBM31VdWoSI5_EHKIwvS9EA_gYl8E4GzcFqmA5ybXdHZ0H63Ox7cvGNq6j2heiF9JUdR4wCpbuUgd5xj12Y4eO7wxrFjoTk1eWX1TGw6JuP4W3q4z1Wtdjz_Xcg5M49RvPayYraw0AV7')" }}></div>
-                <div className="absolute bottom-3 left-3">
-                  <span className="text-white font-bold text-lg bg-black/40 px-2 py-1 rounded">18.2M ETB</span>
+
+                {/* Content */}
+                <div className="p-4">
+                  <h4 className="text-[14px] font-bold text-gray-900 mb-1 group-hover:text-emerald-deep transition-colors">
+                    {veh.title}
+                  </h4>
+                  <p className="text-[12px] text-gray-500 flex items-center gap-2 mb-3">
+                    <span>{veh.year}</span>
+                    <span className="w-1 h-1 rounded-full bg-gray-300" />
+                    <span>{veh.km} km</span>
+                    <span className="w-1 h-1 rounded-full bg-gray-300" />
+                    <span>{veh.fuel}</span>
+                  </p>
+                  <button
+                    className="w-full py-2.5 border border-emerald-deep/20 text-emerald-deep rounded-xl text-[13px] font-semibold hover:bg-emerald-deep hover:text-white active:scale-[0.98] transition-all duration-200"
+                    onClick={(e) => e.preventDefault()}
+                  >
+                    View Details
+                  </button>
                 </div>
-              </div>
-              <div className="p-4">
-                <h4 className="font-label-md text-label-md text-on-surface mb-1">Mercedes-Benz G63 AMG</h4>
-                <p className="text-sm text-on-surface-variant mb-3">2022 &bull; 12,000 km &bull; Petrol</p>
-                <button className="w-full py-2 border border-emerald-deep text-emerald-deep font-label-md text-label-md rounded hover:bg-emerald-deep hover:text-white transition-all">View Details</button>
-              </div>
-            </div>
-            {/* Vehicle Card 3 */}
-            <div className="bg-white border border-outline-variant group cursor-pointer flex flex-col shadow-sm hover:shadow-md transition-all">
-              <div className="relative aspect-[4/3] overflow-hidden">
-                <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuA0KyHLeTCCbxRa5RpZNLt8UDcubYED9EUacrJlUiyzlZtknoBfQpDvH2BrKZGXewnhtBsMPvUY5fXzb8zmyMd7mBjgREOgV51y_8wu7cxdRSgoislMIudt5oyQLbbNUBsTjIohRwBVdGu8UAct3Eu5EFbgluAcizmocUtlhvZD4sCThM9vNjpgwtx6Y9qaDhzMYTH2GfxnBsFTUTrSYIIKlL2gDLMUTG5c_-0VHvJuntFcnau52AIw')" }}></div>
-                <div className="absolute bottom-3 left-3">
-                  <span className="text-white font-bold text-lg bg-black/40 px-2 py-1 rounded">4.8M ETB</span>
-                </div>
-              </div>
-              <div className="p-4">
-                <h4 className="font-label-md text-label-md text-on-surface mb-1">Hyundai Tucson Hybrid</h4>
-                <p className="text-sm text-on-surface-variant mb-3">2021 &bull; 25,000 km &bull; Hybrid</p>
-                <button className="w-full py-2 border border-emerald-deep text-emerald-deep font-label-md text-label-md rounded hover:bg-emerald-deep hover:text-white transition-all">View Details</button>
-              </div>
-            </div>
-            {/* Vehicle Card 4 */}
-            <div className="bg-white border border-outline-variant group cursor-pointer flex flex-col shadow-sm hover:shadow-md transition-all">
-              <div className="relative aspect-[4/3] overflow-hidden">
-                <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuCDM1VKqpIZTBbC6oQtwU1uay3DXVXXDbNIvisvMv8DcQd3sgoXANuC9Pv_Xmwnh3KMV_sSy0x-UmMxGklSVIkEO-2Skj__J1zGRQ4QMShbrA99CSyQt0E-xKCAW5GHVOSpyca4stbiTdJivzqC4pKTK-AegbT0xjEhwhs6y7bzjrpDs5j7LbjWx4EF_Kqas1a910bL-Asd8LXOoEGr6Stmq12FXeN39h34TDu8iqksq_hjhfO9uhPb')" }}></div>
-                <div className="absolute bottom-3 left-3">
-                  <span className="text-white font-bold text-lg bg-black/40 px-2 py-1 rounded">9.5M ETB</span>
-                </div>
-              </div>
-              <div className="p-4">
-                <h4 className="font-label-md text-label-md text-on-surface mb-1">Range Rover Velar</h4>
-                <p className="text-sm text-on-surface-variant mb-3">2020 &bull; 35,000 km &bull; Petrol</p>
-                <button className="w-full py-2 border border-emerald-deep text-emerald-deep font-label-md text-label-md rounded hover:bg-emerald-deep hover:text-white transition-all">View Details</button>
-              </div>
-            </div>
+              </Link>
+            ))}
+          </div>
+
+          <div className="mt-8 text-center sm:hidden">
+            <Link href="/search?type=vehicle" className="inline-flex items-center gap-1 text-[13px] font-semibold text-emerald-deep hover:underline">
+              View All Vehicles <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
+            </Link>
           </div>
         </div>
       </section>
 
-      {/* Seller CTA */}
-      <section className="py-20 bg-emerald-deep overflow-hidden relative">
-        <div className="absolute right-0 top-0 w-1/3 h-full opacity-10 flex items-center justify-center transform translate-x-20">
-          <span className="material-symbols-outlined text-[300px] text-white">sell</span>
+      {/* ═══════════════════════════════════════════════════════
+          SELLER CTA
+          ═══════════════════════════════════════════════════════ */}
+      <section className="py-20 bg-emerald-deep relative overflow-hidden">
+        {/* Decorative */}
+        <div className="absolute inset-0 opacity-[0.04]">
+          <div className="absolute -top-20 -right-20 w-80 h-80 rounded-full bg-white" />
+          <div className="absolute -bottom-32 -left-32 w-96 h-96 rounded-full bg-white" />
         </div>
-        <div className="max-w-container-max mx-auto px-margin-desktop relative z-10">
-          <div className="max-w-2xl">
-            <h2 className="font-display-lg text-display-lg text-white mb-stack-md">Ready to sell your asset?</h2>
-            <p className="font-body-lg text-body-lg text-primary-fixed mb-10">Join Ethiopia&apos;s most trusted marketplace. List your property or vehicle today and reach thousands of verified buyers instantly.</p>
+        <div className="absolute right-10 top-1/2 -translate-y-1/2 opacity-[0.06] hidden lg:block">
+          <span className="material-symbols-outlined text-[280px] text-white">sell</span>
+        </div>
+
+        <div className="max-w-[1200px] mx-auto px-6 relative z-10">
+          <div className="max-w-xl">
+            <span className="inline-block px-4 py-1.5 rounded-full bg-white/15 text-white text-[11px] font-semibold tracking-wider uppercase mb-6">
+              For Sellers
+            </span>
+            <h2 className="text-[32px] font-extrabold text-white mb-4 leading-tight">
+              Ready to Sell Your Asset?
+            </h2>
+            <p className="text-[15px] text-emerald-primary-fixed/80 mb-10 leading-relaxed">
+              Join Ethiopia&apos;s most trusted marketplace. List your property or vehicle today and reach thousands of verified buyers instantly.
+            </p>
             <div className="flex flex-wrap gap-4">
-              <button className="px-8 py-4 bg-white text-emerald-deep font-bold font-label-md text-label-md rounded hover:bg-surface-container-high transition-all flex items-center gap-2">
-                <span className="material-symbols-outlined">add_circle</span> List Your Asset
-              </button>
-              <button className="px-8 py-4 border border-white text-white font-bold font-label-md text-label-md rounded hover:bg-white/10 transition-all">
-                How it Works
-              </button>
+              <Link
+                href="/register"
+                className="px-8 py-4 bg-white text-emerald-deep rounded-xl text-[14px] font-bold hover:bg-gray-50 active:scale-[0.98] transition-all duration-200 flex items-center gap-2 shadow-xl shadow-black/10"
+              >
+                <span className="material-symbols-outlined text-[20px]">add_circle</span>
+                List Your Asset
+              </Link>
+              <Link
+                href="/search"
+                className="px-8 py-4 border-2 border-white/30 text-white rounded-xl text-[14px] font-bold hover:bg-white/10 active:scale-[0.98] transition-all duration-200"
+              >
+                How It Works
+              </Link>
             </div>
           </div>
         </div>

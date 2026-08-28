@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { StatusBadge } from '@/components/ui/StatusBadge'
 import { formatPrice } from '@/lib/utils'
 import { ethiopianRegions } from '@/lib/locations'
 import { VEHICLE_MAKES, FUEL_TYPES, TRANSMISSIONS, BODY_TYPES, PROPERTY_TYPES, FURNISHING_STATUS } from '@/lib/utils'
@@ -21,7 +20,6 @@ interface Filters {
   subCity: string
   radius: string
   sortBy: SortBy
-  // Car filters
   make: string
   model: string
   minYear: string
@@ -30,7 +28,6 @@ interface Filters {
   transmission: string
   bodyType: string
   condition: string
-  // Property filters
   propertyType: string
   minBedrooms: string
   maxBedrooms: string
@@ -76,7 +73,7 @@ const MOCK_LISTINGS = [
 
 export default function SearchPage() {
   const [filters, setFilters] = useState<Filters>(INITIAL_FILTERS)
-  const [showFilters, setShowFilters] = useState(false)
+  const [showFilters, setShowFilters] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
 
   const updateFilter = (key: keyof Filters, value: string) => {
@@ -99,354 +96,309 @@ export default function SearchPage() {
     return false
   }).length
 
+  const filterInputClass = "w-full px-3 py-2 rounded-xl bg-gray-50 text-[12px] text-gray-800 border border-gray-100 focus:border-emerald-deep/40 focus:bg-white focus:ring-2 focus:ring-emerald-deep/10 outline-none transition-all"
+  const filterLabelClass = "text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1.5 block"
+
   return (
-    <div className="min-h-screen bg-surface">
-      {/* Search Header */}
-      <div className="sticky top-0 z-10 bg-surface/80 backdrop-blur-xl border-b border-outline-variant">
-        <div className="max-w-6xl mx-auto px-4 py-3">
+    <div className="min-h-screen bg-white">
+      {/* ── Search Header ── */}
+      <div className="sticky top-0 z-20 bg-white/90 backdrop-blur-xl border-b border-gray-100">
+        <div className="max-w-[1200px] mx-auto px-6 py-3">
           <div className="flex items-center gap-3">
-            <Link href="/" className="text-on-surface-variant hover:text-on-surface">
-              <span className="material-symbols-outlined">arrow_back</span>
+            <Link href="/" className="p-2 rounded-xl hover:bg-gray-50 text-gray-400 hover:text-gray-600 transition-colors">
+              <span className="material-symbols-outlined text-[20px]">arrow_back</span>
             </Link>
+
             <div className="flex-1 relative">
-              <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-lg">search</span>
+              <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-[18px]">search</span>
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search cars and properties..."
-                className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-surface-container-low text-sm text-on-surface placeholder:text-on-surface-variant border border-outline-variant focus:border-primary focus:outline-none"
+                placeholder="Search properties, vehicles, locations..."
+                className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-gray-50 text-[13px] text-gray-800 placeholder:text-gray-400 border border-gray-100 focus:border-emerald-deep/30 focus:bg-white focus:ring-2 focus:ring-emerald-deep/10 outline-none transition-all"
               />
             </div>
+
+            {/* Active filter chips */}
+            {activeFilterCount > 0 && (
+              <span className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-deep/10 text-emerald-deep text-[11px] font-semibold">
+                {activeFilterCount} filters active
+                <button onClick={clearFilters} className="hover:text-emerald-deep/70">
+                  <span className="material-symbols-outlined text-[14px]">close</span>
+                </button>
+              </span>
+            )}
+
             <button
               onClick={() => setShowFilters(!showFilters)}
-              className={`relative p-2.5 rounded-xl transition-colors ${
-                showFilters ? 'bg-primary text-on-primary' : 'bg-surface-container-low text-on-surface-variant'
-              }`}
+              className={`p-2.5 rounded-xl transition-all ${showFilters ? 'bg-emerald-deep text-white shadow-md shadow-emerald-deep/20' : 'bg-gray-50 text-gray-500 hover:bg-gray-100'}`}
             >
-              <span className="material-symbols-outlined text-lg">tune</span>
-              {activeFilterCount > 0 && (
-                <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-error text-white text-[9px] flex items-center justify-center">
-                  {activeFilterCount}
-                </span>
-              )}
+              <span className="material-symbols-outlined text-[20px]">tune</span>
             </button>
           </div>
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-4 py-4">
-        <div className="flex gap-6">
-          {/* Filter Sidebar */}
+      <div className="max-w-[1200px] mx-auto px-6 py-6">
+        <div className="flex gap-8">
+          {/* ── Filter Sidebar ── */}
           {showFilters && (
-            <div className="w-72 flex-shrink-0 space-y-4">
-              <div className="bento-card space-y-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-semibold text-on-surface">Filters</h3>
-                  <button onClick={clearFilters} className="text-[10px] text-primary hover:text-primary/80">
-                    Clear all
-                  </button>
-                </div>
+            <aside className="w-64 flex-shrink-0 space-y-5 animate-fade-in-up">
+              <div className="flex items-center justify-between">
+                <h3 className="text-[13px] font-bold text-gray-900">Filters</h3>
+                <button onClick={clearFilters} className="text-[11px] font-medium text-emerald-deep hover:text-emerald-deep/70 transition-colors">
+                  Clear all
+                </button>
+              </div>
 
-                {/* Category */}
-                <div>
-                  <label className="text-[10px] font-medium text-on-surface-variant mb-1.5 block">Category</label>
-                  <div className="flex gap-1">
-                    {[
-                      { key: 'all', label: 'All' },
-                      { key: 'car', label: 'Vehicles' },
-                      { key: 'house', label: 'Properties' },
-                    ].map((c) => (
-                      <button
-                        key={c.key}
-                        onClick={() => updateFilter('category', c.key)}
-                        className={`flex-1 py-1.5 rounded-lg text-[10px] font-medium transition-colors ${
-                          filters.category === c.key
-                            ? 'bg-primary text-on-primary'
-                            : 'bg-surface-container-low text-on-surface-variant'
-                        }`}
-                      >
-                        {c.label}
-                      </button>
-                    ))}
-                  </div>
+              {/* Category */}
+              <div>
+                <label className={filterLabelClass}>Category</label>
+                <div className="flex gap-1 p-1 bg-gray-50 rounded-xl">
+                  {[
+                    { key: 'all', label: 'All' },
+                    { key: 'car', label: 'Vehicles' },
+                    { key: 'house', label: 'Properties' },
+                  ].map((c) => (
+                    <button
+                      key={c.key}
+                      onClick={() => updateFilter('category', c.key)}
+                      className={`flex-1 py-2 rounded-lg text-[11px] font-semibold transition-all duration-200 ${
+                        filters.category === c.key
+                          ? 'bg-emerald-deep text-white shadow-md shadow-emerald-deep/20'
+                          : 'text-gray-500 hover:text-gray-700'
+                      }`}
+                    >
+                      {c.label}
+                    </button>
+                  ))}
                 </div>
+              </div>
 
-                {/* Listing Type */}
-                <div>
-                  <label className="text-[10px] font-medium text-on-surface-variant mb-1.5 block">Listing Type</label>
-                  <div className="flex gap-1">
-                    {[
-                      { key: 'all', label: 'All' },
-                      { key: 'sale', label: 'For Sale' },
-                      { key: 'rent', label: 'For Rent' },
-                    ].map((t) => (
-                      <button
-                        key={t.key}
-                        onClick={() => updateFilter('listingType', t.key)}
-                        className={`flex-1 py-1.5 rounded-lg text-[10px] font-medium transition-colors ${
-                          filters.listingType === t.key
-                            ? 'bg-primary text-on-primary'
-                            : 'bg-surface-container-low text-on-surface-variant'
-                        }`}
-                      >
-                        {t.label}
-                      </button>
-                    ))}
-                  </div>
+              {/* Listing Type */}
+              <div>
+                <label className={filterLabelClass}>Listing Type</label>
+                <div className="flex gap-1 p-1 bg-gray-50 rounded-xl">
+                  {[
+                    { key: 'all', label: 'All' },
+                    { key: 'sale', label: 'For Sale' },
+                    { key: 'rent', label: 'For Rent' },
+                  ].map((t) => (
+                    <button
+                      key={t.key}
+                      onClick={() => updateFilter('listingType', t.key)}
+                      className={`flex-1 py-2 rounded-lg text-[11px] font-semibold transition-all duration-200 ${
+                        filters.listingType === t.key
+                          ? 'bg-emerald-deep text-white shadow-md shadow-emerald-deep/20'
+                          : 'text-gray-500 hover:text-gray-700'
+                      }`}
+                    >
+                      {t.label}
+                    </button>
+                  ))}
                 </div>
+              </div>
 
-                {/* Price Range */}
-                <div>
-                  <label className="text-[10px] font-medium text-on-surface-variant mb-1.5 block">Price Range (Br)</label>
-                  <div className="flex gap-2">
-                    <input
-                      type="number"
-                      value={filters.minPrice}
-                      onChange={(e) => updateFilter('minPrice', e.target.value)}
-                      placeholder="Min"
-                      className="flex-1 px-2 py-1.5 rounded-lg bg-surface-container-low text-[10px] text-on-surface border border-outline-variant focus:border-primary focus:outline-none"
-                    />
-                    <input
-                      type="number"
-                      value={filters.maxPrice}
-                      onChange={(e) => updateFilter('maxPrice', e.target.value)}
-                      placeholder="Max"
-                      className="flex-1 px-2 py-1.5 rounded-lg bg-surface-container-low text-[10px] text-on-surface border border-outline-variant focus:border-primary focus:outline-none"
-                    />
-                  </div>
+              {/* Price Range */}
+              <div>
+                <label className={filterLabelClass}>Price Range (Br)</label>
+                <div className="flex gap-2">
+                  <input
+                    type="number"
+                    value={filters.minPrice}
+                    onChange={(e) => updateFilter('minPrice', e.target.value)}
+                    placeholder="Min"
+                    className={filterInputClass}
+                  />
+                  <input
+                    type="number"
+                    value={filters.maxPrice}
+                    onChange={(e) => updateFilter('maxPrice', e.target.value)}
+                    placeholder="Max"
+                    className={filterInputClass}
+                  />
                 </div>
+              </div>
 
-                {/* Location */}
+              {/* Location */}
+              <div>
+                <label className={filterLabelClass}>Region</label>
+                <select
+                  value={filters.location}
+                  onChange={(e) => { updateFilter('location', e.target.value); updateFilter('city', ''); }}
+                  className={filterInputClass}
+                >
+                  <option value="">All Regions</option>
+                  {ethiopianRegions.map((r) => (
+                    <option key={r.name} value={r.name}>{r.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              {filters.location && (
                 <div>
-                  <label className="text-[10px] font-medium text-on-surface-variant mb-1.5 block">Region</label>
+                  <label className={filterLabelClass}>City</label>
                   <select
-                    value={filters.location}
-                    onChange={(e) => { updateFilter('location', e.target.value); updateFilter('city', ''); }}
-                    className="w-full px-2 py-1.5 rounded-lg bg-surface-container-low text-[10px] text-on-surface border border-outline-variant focus:border-primary focus:outline-none appearance-none"
+                    value={filters.city}
+                    onChange={(e) => updateFilter('city', e.target.value)}
+                    className={filterInputClass}
                   >
-                    <option value="">All Regions</option>
-                    {ethiopianRegions.map((r) => (
-                      <option key={r.name} value={r.name}>{r.name}</option>
+                    <option value="">All Cities</option>
+                    {cities.map((c) => (
+                      <option key={c.name} value={c.name}>{c.name}</option>
                     ))}
                   </select>
                 </div>
+              )}
 
-                {filters.location && (
+              {/* Sort By */}
+              <div>
+                <label className={filterLabelClass}>Sort By</label>
+                <select
+                  value={filters.sortBy}
+                  onChange={(e) => updateFilter('sortBy', e.target.value)}
+                  className={filterInputClass}
+                >
+                  <option value="relevance">Relevance</option>
+                  <option value="price-low">Price: Low to High</option>
+                  <option value="price-high">Price: High to Low</option>
+                  <option value="newest">Newest First</option>
+                  <option value="oldest">Oldest First</option>
+                </select>
+              </div>
+
+              <div className="divider-glow" />
+
+              {/* Vehicle Filters */}
+              {(filters.category === 'car' || filters.category === 'all') && (
+                <div className="space-y-4">
+                  <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Vehicle Details</span>
                   <div>
-                    <label className="text-[10px] font-medium text-on-surface-variant mb-1.5 block">City</label>
-                    <select
-                      value={filters.city}
-                      onChange={(e) => updateFilter('city', e.target.value)}
-                      className="w-full px-2 py-1.5 rounded-lg bg-surface-container-low text-[10px] text-on-surface border border-outline-variant focus:border-primary focus:outline-none appearance-none"
-                    >
-                      <option value="">All Cities</option>
-                      {cities.map((c) => (
-                        <option key={c.name} value={c.name}>{c.name}</option>
-                      ))}
+                    <label className={filterLabelClass}>Make</label>
+                    <select value={filters.make} onChange={(e) => updateFilter('make', e.target.value)} className={filterInputClass}>
+                      <option value="">All Makes</option>
+                      {VEHICLE_MAKES.map((m) => <option key={m} value={m}>{m}</option>)}
                     </select>
                   </div>
-                )}
-
-                {/* Sort By */}
-                <div>
-                  <label className="text-[10px] font-medium text-on-surface-variant mb-1.5 block">Sort By</label>
-                  <select
-                    value={filters.sortBy}
-                    onChange={(e) => updateFilter('sortBy', e.target.value)}
-                    className="w-full px-2 py-1.5 rounded-lg bg-surface-container-low text-[10px] text-on-surface border border-outline-variant focus:border-primary focus:outline-none appearance-none"
-                  >
-                    <option value="relevance">Relevance</option>
-                    <option value="price-low">Price: Low to High</option>
-                    <option value="price-high">Price: High to Low</option>
-                    <option value="newest">Newest First</option>
-                    <option value="oldest">Oldest First</option>
-                  </select>
+                  <div>
+                    <label className={filterLabelClass}>Year Range</label>
+                    <div className="flex gap-2">
+                      <input type="number" value={filters.minYear} onChange={(e) => updateFilter('minYear', e.target.value)} placeholder="From" className={filterInputClass} />
+                      <input type="number" value={filters.maxYear} onChange={(e) => updateFilter('maxYear', e.target.value)} placeholder="To" className={filterInputClass} />
+                    </div>
+                  </div>
+                  <div>
+                    <label className={filterLabelClass}>Fuel Type</label>
+                    <select value={filters.fuelType} onChange={(e) => updateFilter('fuelType', e.target.value)} className={filterInputClass}>
+                      <option value="">All</option>
+                      {FUEL_TYPES.map((f) => <option key={f} value={f}>{f}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className={filterLabelClass}>Transmission</label>
+                    <select value={filters.transmission} onChange={(e) => updateFilter('transmission', e.target.value)} className={filterInputClass}>
+                      <option value="">All</option>
+                      {TRANSMISSIONS.map((t) => <option key={t} value={t}>{t}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className={filterLabelClass}>Body Type</label>
+                    <select value={filters.bodyType} onChange={(e) => updateFilter('bodyType', e.target.value)} className={filterInputClass}>
+                      <option value="">All</option>
+                      {BODY_TYPES.map((b) => <option key={b} value={b}>{b}</option>)}
+                    </select>
+                  </div>
                 </div>
+              )}
 
-                {/* Vehicle Filters */}
-                {filters.category === 'car' || filters.category === 'all' ? (
-                  <>
-                    <div>
-                      <label className="text-[10px] font-medium text-on-surface-variant mb-1.5 block">Make</label>
-                      <select
-                        value={filters.make}
-                        onChange={(e) => updateFilter('make', e.target.value)}
-                        className="w-full px-2 py-1.5 rounded-lg bg-surface-container-low text-[10px] text-on-surface border border-outline-variant focus:border-primary focus:outline-none appearance-none"
-                      >
-                        <option value="">All Makes</option>
-                        {VEHICLE_MAKES.map((m) => (
-                          <option key={m} value={m}>{m}</option>
-                        ))}
-                      </select>
+              {/* Property Filters */}
+              {(filters.category === 'house' || filters.category === 'all') && (
+                <div className="space-y-4">
+                  <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Property Details</span>
+                  <div>
+                    <label className={filterLabelClass}>Property Type</label>
+                    <select value={filters.propertyType} onChange={(e) => updateFilter('propertyType', e.target.value)} className={filterInputClass}>
+                      <option value="">All</option>
+                      {PROPERTY_TYPES.map((p) => <option key={p} value={p}>{p}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className={filterLabelClass}>Bedrooms</label>
+                    <div className="flex gap-2">
+                      <input type="number" value={filters.minBedrooms} onChange={(e) => updateFilter('minBedrooms', e.target.value)} placeholder="Min" className={filterInputClass} />
+                      <input type="number" value={filters.maxBedrooms} onChange={(e) => updateFilter('maxBedrooms', e.target.value)} placeholder="Max" className={filterInputClass} />
                     </div>
-
-                    <div>
-                      <label className="text-[10px] font-medium text-on-surface-variant mb-1.5 block">Year Range</label>
-                      <div className="flex gap-2">
-                        <input
-                          type="number"
-                          value={filters.minYear}
-                          onChange={(e) => updateFilter('minYear', e.target.value)}
-                          placeholder="From"
-                          className="flex-1 px-2 py-1.5 rounded-lg bg-surface-container-low text-[10px] text-on-surface border border-outline-variant focus:border-primary focus:outline-none"
-                        />
-                        <input
-                          type="number"
-                          value={filters.maxYear}
-                          onChange={(e) => updateFilter('maxYear', e.target.value)}
-                          placeholder="To"
-                          className="flex-1 px-2 py-1.5 rounded-lg bg-surface-container-low text-[10px] text-on-surface border border-outline-variant focus:border-primary focus:outline-none"
-                        />
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="text-[10px] font-medium text-on-surface-variant mb-1.5 block">Fuel Type</label>
-                      <select
-                        value={filters.fuelType}
-                        onChange={(e) => updateFilter('fuelType', e.target.value)}
-                        className="w-full px-2 py-1.5 rounded-lg bg-surface-container-low text-[10px] text-on-surface border border-outline-variant focus:border-primary focus:outline-none appearance-none"
-                      >
-                        <option value="">All</option>
-                        {FUEL_TYPES.map((f) => (
-                          <option key={f} value={f}>{f}</option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="text-[10px] font-medium text-on-surface-variant mb-1.5 block">Transmission</label>
-                      <select
-                        value={filters.transmission}
-                        onChange={(e) => updateFilter('transmission', e.target.value)}
-                        className="w-full px-2 py-1.5 rounded-lg bg-surface-container-low text-[10px] text-on-surface border border-outline-variant focus:border-primary focus:outline-none appearance-none"
-                      >
-                        <option value="">All</option>
-                        {TRANSMISSIONS.map((t) => (
-                          <option key={t} value={t}>{t}</option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="text-[10px] font-medium text-on-surface-variant mb-1.5 block">Body Type</label>
-                      <select
-                        value={filters.bodyType}
-                        onChange={(e) => updateFilter('bodyType', e.target.value)}
-                        className="w-full px-2 py-1.5 rounded-lg bg-surface-container-low text-[10px] text-on-surface border border-outline-variant focus:border-primary focus:outline-none appearance-none"
-                      >
-                        <option value="">All</option>
-                        {BODY_TYPES.map((b) => (
-                          <option key={b} value={b}>{b}</option>
-                        ))}
-                      </select>
-                    </div>
-                  </>
-                ) : null}
-
-                {/* Property Filters */}
-                {filters.category === 'house' || filters.category === 'all' ? (
-                  <>
-                    <div>
-                      <label className="text-[10px] font-medium text-on-surface-variant mb-1.5 block">Property Type</label>
-                      <select
-                        value={filters.propertyType}
-                        onChange={(e) => updateFilter('propertyType', e.target.value)}
-                        className="w-full px-2 py-1.5 rounded-lg bg-surface-container-low text-[10px] text-on-surface border border-outline-variant focus:border-primary focus:outline-none appearance-none"
-                      >
-                        <option value="">All</option>
-                        {PROPERTY_TYPES.map((p) => (
-                          <option key={p} value={p}>{p}</option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="text-[10px] font-medium text-on-surface-variant mb-1.5 block">Bedrooms</label>
-                      <div className="flex gap-2">
-                        <input
-                          type="number"
-                          value={filters.minBedrooms}
-                          onChange={(e) => updateFilter('minBedrooms', e.target.value)}
-                          placeholder="Min"
-                          className="flex-1 px-2 py-1.5 rounded-lg bg-surface-container-low text-[10px] text-on-surface border border-outline-variant focus:border-primary focus:outline-none"
-                        />
-                        <input
-                          type="number"
-                          value={filters.maxBedrooms}
-                          onChange={(e) => updateFilter('maxBedrooms', e.target.value)}
-                          placeholder="Max"
-                          className="flex-1 px-2 py-1.5 rounded-lg bg-surface-container-low text-[10px] text-on-surface border border-outline-variant focus:border-primary focus:outline-none"
-                        />
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="text-[10px] font-medium text-on-surface-variant mb-1.5 block">Furnishing</label>
-                      <select
-                        value={filters.furnished}
-                        onChange={(e) => updateFilter('furnished', e.target.value)}
-                        className="w-full px-2 py-1.5 rounded-lg bg-surface-container-low text-[10px] text-on-surface border border-outline-variant focus:border-primary focus:outline-none appearance-none"
-                      >
-                        <option value="">All</option>
-                        {FURNISHING_STATUS.map((f) => (
-                          <option key={f} value={f}>{f}</option>
-                        ))}
-                      </select>
-                    </div>
-                  </>
-                ) : null}
-              </div>
-            </div>
+                  </div>
+                  <div>
+                    <label className={filterLabelClass}>Furnishing</label>
+                    <select value={filters.furnished} onChange={(e) => updateFilter('furnished', e.target.value)} className={filterInputClass}>
+                      <option value="">All</option>
+                      {FURNISHING_STATUS.map((f) => <option key={f} value={f}>{f}</option>)}
+                    </select>
+                  </div>
+                </div>
+              )}
+            </aside>
           )}
 
-          {/* Search Results */}
-          <div className="flex-1">
-            <div className="flex items-center justify-between mb-4">
-              <p className="text-xs text-on-surface-variant">
-                <span className="font-medium text-on-surface">{MOCK_LISTINGS.length}</span> results found
+          {/* ── Results ── */}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center justify-between mb-5">
+              <p className="text-[13px] text-gray-500">
+                <span className="font-bold text-gray-900">{MOCK_LISTINGS.length}</span> results found
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            <div className={`grid grid-cols-1 sm:grid-cols-2 ${showFilters ? 'lg:grid-cols-2' : 'lg:grid-cols-3'} gap-5 stagger-children`}>
               {MOCK_LISTINGS.map((listing) => (
                 <Link
                   key={listing.id}
                   href={`/property/${listing.id}`}
-                  className="bento-card hover:border-primary/50 transition-all group"
+                  className="premium-card group"
                 >
-                  <div className="aspect-[4/3] rounded-xl bg-surface-container-high mb-3 flex items-center justify-center relative">
-                    <span className="material-symbols-outlined text-on-surface-variant text-3xl">
-                      {listing.type === 'car' ? 'directions_car' : 'home'}
-                    </span>
+                  {/* Image */}
+                  <div className="relative aspect-[4/3] overflow-hidden rounded-t-[19px]">
+                    <div className="card-image absolute inset-0 bg-gray-100 flex items-center justify-center">
+                      <span className="material-symbols-outlined text-gray-300 text-[40px]">
+                        {listing.type === 'car' ? 'directions_car' : 'home'}
+                      </span>
+                    </div>
                     {listing.featured && (
-                      <span className="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-amber-500 text-white text-[9px] font-semibold flex items-center gap-1">
-                        <span className="material-symbols-outlined text-[10px]">star</span>
+                      <span className="absolute top-3 left-3 badge-featured px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider flex items-center gap-1">
+                        <span className="material-symbols-outlined text-[12px]" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
                         Featured
                       </span>
                     )}
-                    <button className="absolute top-2 right-2 w-7 h-7 rounded-full bg-surface/80 backdrop-blur-sm flex items-center justify-center text-on-surface-variant hover:text-error transition-colors">
-                      <span className="material-symbols-outlined text-sm">bookmark</span>
+                    <button className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center text-gray-500 hover:text-red-500 hover:bg-white transition-all shadow-sm" onClick={(e) => e.preventDefault()}>
+                      <span className="material-symbols-outlined text-[18px]">bookmark</span>
                     </button>
+                    <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/70 to-transparent">
+                      <span className="text-white text-[18px] font-extrabold">{formatPrice(listing.price)}</span>
+                    </div>
                   </div>
 
-                  <div className="space-y-1.5">
-                    <div className="flex items-center gap-1.5">
-                      <StatusBadge status={listing.listingType === 'sale' ? 'For Sale' : 'For Rent'} />
-                      <StatusBadge status={listing.type === 'car' ? 'Vehicle' : 'Property'} />
+                  {/* Content */}
+                  <div className="p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider ${
+                        listing.listingType === 'sale' ? 'badge-sale' : 'badge-rent'
+                      }`}>
+                        {listing.listingType === 'sale' ? 'For Sale' : 'For Rent'}
+                      </span>
+                      <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider ${
+                        listing.type === 'car' ? 'bg-blue-50 text-blue-700' : 'bg-emerald-50 text-emerald-700'
+                      }`}>
+                        {listing.type === 'car' ? 'Vehicle' : 'Property'}
+                      </span>
                     </div>
-
-                    <h3 className="text-sm font-semibold text-on-surface truncate group-hover:text-primary transition-colors">
+                    <h3 className="text-[14px] font-bold text-gray-900 mb-1 truncate group-hover:text-emerald-deep transition-colors">
                       {listing.title}
                     </h3>
-
-                    <p className="text-base font-bold text-primary">{formatPrice(listing.price)}</p>
-
-                    <div className="flex items-center gap-1 text-on-surface-variant">
-                      <span className="material-symbols-outlined text-xs">location_on</span>
-                      <span className="text-[10px]">{listing.location}</span>
-                    </div>
+                    <p className="text-[12px] text-gray-500 flex items-center gap-1">
+                      <span className="material-symbols-outlined text-[14px]">location_on</span>
+                      {listing.location}
+                    </p>
                   </div>
                 </Link>
               ))}
