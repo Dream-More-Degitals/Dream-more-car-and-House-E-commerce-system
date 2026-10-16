@@ -1,6 +1,0 @@
-{
-  "version": 3,
-  "sources": [],
-  "sections": [
-    {"offset": {"line": 4, "column": 0}, "map": {"version":3,"sources":["file:///C:/Users/Lenovo/Desktop/Desktop/Dream-more-car-and-House-E-commerce-system/my-app/app/(auth)/layout.tsx"],"sourcesContent":["export default function AuthLayout({ children }: { children: React.ReactNode }) {\n  return (\n    <div className=\"min-h-screen flex items-center justify-center bg-gradient-to-br from-surface-gray via-surface-container-low to-surface-gray px-4\">\n      {children}\n    </div>\n  )\n}\n"],"names":["AuthLayout","children","className"],"mappings":";;;;;;AAAe,SAASA,WAAW,EAAEC,QAAQ,EAAiC;IAC5E,qBACE,8OAAC;QAAIC,WAAU;kBACZD;;;;;;AAGP"}}]
-}
