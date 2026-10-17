@@ -1,9 +1,5 @@
 import { redis } from "@/lib/redis";
 
-if (process.env.CACHE_ENABLED === "false") {
-  return { value: await loader(), hit: false };
-}
-
 const VERSION_KEY = "listings:version";
 
 async function currentVersion() {
@@ -19,6 +15,10 @@ export async function cached<T>(
   ttlSeconds: number,
   loader: () => Promise<T>,
 ): Promise<{ value: T; hit: boolean }> {
+  if (process.env.CACHE_ENABLED === "false") {
+    return { value: await loader(), hit: false };
+  }
+
   const key = `listings:v${await currentVersion()}:${name}`;
 
   try {

@@ -64,12 +64,16 @@ export async function GET(req: NextRequest) {
           : {}),
       };
 
-      const orderBy: Prisma.ListingOrderByWithRelationInput[] = {
+      const orderByOptions: Record<
+        typeof f.sort,
+        Prisma.ListingOrderByWithRelationInput[]
+      > = {
         newest: [{ createdAt: "desc" }, { id: "desc" }],
         oldest: [{ createdAt: "asc" }, { id: "asc" }],
         price_asc: [{ price: "asc" }, { id: "asc" }],
         price_desc: [{ price: "desc" }, { id: "desc" }],
-      }[f.sort];
+      };
+      const orderBy = orderByOptions[f.sort];
 
       const [total, items] = await Promise.all([
         prisma.listing.count({ where }),
