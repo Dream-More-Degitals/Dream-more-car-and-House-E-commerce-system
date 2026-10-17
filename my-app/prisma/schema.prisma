@@ -40,6 +40,7 @@ model User {
 
   refreshTokens RefreshToken[]
   auditLogs     AuditLog[]
+  listings      Listing[]
 
   @@index([role, status])
   @@index([createdAt])
@@ -77,4 +78,62 @@ model AuditLog {
 
   @@index([userId, createdAt])
   @@index([action, createdAt])
+}
+
+enum ListingCategory {
+  VEHICLE
+  PROPERTY
+}
+
+enum ListingType {
+  SALE
+  RENT
+}
+
+enum ListingStatus {
+  DRAFT
+  PENDING
+  ACTIVE
+  EXPIRED
+  REMOVED
+}
+
+model Listing {
+  id          String          @id @default(uuid()) @db.Uuid
+  sellerId    String          @db.Uuid
+  category    ListingCategory
+  listingType ListingType
+  status      ListingStatus   @default(PENDING)
+  title       String
+  description String
+  price       Int
+  region      String
+  city        String
+  subCity     String?
+
+  make           String?
+  model          String?
+  year           Int?
+  mileageKm      Int?
+  fuelType       String?
+  transmission   String?
+  bodyType       String?
+  engineCc       Int?
+  previousOwners Int?
+
+  propertyType String?
+  bedrooms     Int?
+  bathrooms    Int?
+  sizeSqm      Int?
+  condition    String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  seller User @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+
+  @@index([status, createdAt])
+  @@index([status, category, listingType, price])
+  @@index([status, region, city])
+  @@index([sellerId, status])
 }
