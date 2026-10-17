@@ -1,10 +1,10 @@
 generator client {
-  provider = "prisma-client-js"
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
-  
 }
 
 enum Role {
@@ -13,25 +13,127 @@ enum Role {
   ADMIN
 }
 
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+  DEACTIVATED
+}
+
 model User {
-  id           String   @id @default(uuid())
-  email        String   @unique
-  passwordHash String
-  fullName     String
-  phone        String?  @unique
-  role         Role     @default(BUYER)
-  isVerified   Boolean  @default(false)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id               String     @id @default(uuid()) @db.Uuid
+  email            String?    @unique
+  phone            String?    @unique
+  passwordHash     String
+  name             String
+  avatarUrl        String?
+  role             Role       @default(BUYER)
+  status           UserStatus @default(ACTIVE)
+  emailVerified    Boolean    @default(false)
+  phoneVerified    Boolean    @default(false)
+  termsAcceptedAt  DateTime
+  failedLoginCount Int        @default(0)
+  lockedUntil      DateTime?
+  lastLoginAt      DateTime?
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+  deletedAt        DateTime?
 
   refreshTokens RefreshToken[]
+  auditLogs     AuditLog[]
+  listings      Listing[]
+
+  @@index([role, status])
+  @@index([createdAt])
 }
 
 model RefreshToken {
-  id        String   @id @default(uuid())
-  token     String   @unique
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  expiresAt DateTime
+  id           String    @id @default(uuid()) @db.Uuid
+  userId       String    @db.Uuid
+  tokenHash    String    @unique
+  familyId     String    @db.Uuid
+  expiresAt    DateTime
+  revokedAt    DateTime?
+  replacedById String?   @db.Uuid
+  userAgent    String?
+  ip           String?
+  createdAt    DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([familyId])
+  @@index([expiresAt])
+}
+
+model AuditLog {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String?  @db.Uuid
+  action    String
+  ip        String?
+  userAgent String?
+  metadata  Json?
   createdAt DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId, createdAt])
+  @@index([action, createdAt])
+}
+
+enum ListingCategory {
+  VEHICLE
+  PROPERTY
+}
+
+enum ListingType {
+  SALE
+  RENT
+}
+
+enum ListingStatus {
+  DRAFT
+  PENDING
+  ACTIVE
+  EXPIRED
+  REMOVED
+}
+
+model Listing {
+  id          String          @id @default(uuid()) @db.Uuid
+  sellerId    String          @db.Uuid
+  category    ListingCategory
+  listingType ListingType
+  status      ListingStatus   @default(PENDING)
+  title       String
+  description String
+  price       Int
+  region      String
+  city        String
+  subCity     String?
+
+  make           String?
+  model          String?
+  year           Int?
+  mileageKm      Int?
+  fuelType       String?
+  transmission   String?
+  bodyType       String?
+  engineCc       Int?
+  previousOwners Int?
+
+  propertyType String?
+  bedrooms     Int?
+  bathrooms    Int?
+  sizeSqm      Int?
+  condition    String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  seller User @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+
+  @@index([status, createdAt])
+  @@index([status, category, listingType, price])
+  @@index([status, region, city])
+  @@index([sellerId, status])
 }
