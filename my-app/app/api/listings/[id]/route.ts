@@ -3,6 +3,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { withAuth } from "@/lib/auth";
 import { audit } from "@/lib/audit";
+import { cached, invalidateListings } from "@/lib/cache";
 import { updateListingSchema } from "@/lib/validators/listing";
 
 const isUuid = (v: string) => z.uuid().safeParse(v).success;
@@ -15,12 +16,18 @@ export async function GET(
   const { id } = await ctx.params;
   if (!isUuid(id)) return notFound();
 
-  const listing = await prisma.listing.findFirst({
-    where: { id, status: "ACTIVE" },
-    include: { seller: { select: { id: true, name: true } } },
-  });
+  const { value: listing, hit } = await cached(`detail:${id}`, 300, () =>
+    prisma.listing.findFirst({
+      where: { id, status: "ACTIVE" },
+      include: { seller: { select: { id: true, name: true } } },
+    }),
+  );
   if (!listing) return notFound();
-  return NextResponse.json({ listing });
+
+  return NextResponse.json(
+    { listing },
+    { headers: { "x-cache": hit ? "HIT" : "MISS" } },
+  );
 }
 
 export const PATCH = withAuth(["SELLER"], async (req, ctx, auth) => {
@@ -48,6 +55,7 @@ export const PATCH = withAuth(["SELLER"], async (req, ctx, auth) => {
     data: { ...parsed.data, ...(needsReview ? { status: "PENDING" } : {}) },
     select: { id: true, status: true },
   });
+  await invalidateListings();
   return NextResponse.json({ listing });
 });
 
@@ -62,6 +70,7 @@ export const DELETE = withAuth(["SELLER", "ADMIN"], async (req, ctx, auth) => {
   });
   if (result.count === 0) return notFound();
 
+  await invalidateListings();
   await audit("listing_removed", req, auth.sub, { listingId: id });
   return NextResponse.json({ ok: true });
 });

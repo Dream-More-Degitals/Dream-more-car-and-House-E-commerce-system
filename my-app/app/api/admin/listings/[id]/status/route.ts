@@ -3,6 +3,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { withAuth } from "@/lib/auth";
 import { audit } from "@/lib/audit";
+import { invalidateListings } from "@/lib/cache";
 
 const bodySchema = z.object({ status: z.enum(["ACTIVE", "REMOVED"]) });
 
@@ -26,6 +27,7 @@ export const PATCH = withAuth(["ADMIN"], async (req, ctx, auth) => {
     .catch(() => null);
   if (!listing) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
+  await invalidateListings();
   await audit("listing_status_changed", req, auth.sub, {
     listingId: id,
     status: parsed.data.status,
