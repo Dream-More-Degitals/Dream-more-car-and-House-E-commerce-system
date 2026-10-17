@@ -1,5 +1,9 @@
 import { redis } from "@/lib/redis";
 
+if (process.env.CACHE_ENABLED === "false") {
+  return { value: await loader(), hit: false };
+}
+
 const VERSION_KEY = "listings:version";
 
 async function currentVersion() {
