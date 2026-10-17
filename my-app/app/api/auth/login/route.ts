@@ -1,8 +1,16 @@
 import { NextResponse } from "next/server";
+import { randomUUID } from "crypto";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { loginSchema } from "@/lib/validators/auth";
 import { signAccessToken } from "@/lib/jwt";
+import { audit } from "@/lib/audit";
+import {
+  REFRESH_TTL_MS,
+  clientInfo,
+  newRefreshToken,
+  setRefreshCookie,
+} from "@/lib/refresh";
 
 const MAX_FAILS = 5;
 const LOCK_MS = 15 * 60 * 1000;
@@ -47,8 +55,25 @@ export async function POST(req: Request) {
   });
 
   const accessToken = signAccessToken({ sub: user.id, role: user.role });
-  return NextResponse.json({
+
+  const refresh = newRefreshToken();
+  const { ip, userAgent } = clientInfo(req);
+  await prisma.refreshToken.create({
+    data: {
+      userId: user.id,
+      tokenHash: refresh.hash,
+      familyId: randomUUID(),
+      expiresAt: new Date(Date.now() + REFRESH_TTL_MS),
+      ip,
+      userAgent,
+    },
+  });
+  await audit("login", req, user.id);
+
+  const res = NextResponse.json({
     accessToken,
     user: { id: user.id, name: user.name, email: user.email, role: user.role },
   });
+  setRefreshCookie(res, refresh.raw);
+  return res;
 }
